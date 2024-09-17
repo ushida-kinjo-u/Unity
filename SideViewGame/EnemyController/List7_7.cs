@@ -1,4 +1,4 @@
-// 敵キャラのスクリプト
+// List 7-7 敵キャラのスクリプト
 
 using System.Collections;
 using System.Collections.Generic;
