@@ -1,4 +1,4 @@
-List 4-2 アニメーションさせるためにスクリプトを変更しよう
+// List 4-2 アニメーションさせるためにスクリプトを変更しよう
 
 using System.Collections;
 using System.Collections.Generic;
