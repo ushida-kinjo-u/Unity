@@ -40,6 +40,6 @@ public class PlayerController : MonoBehaviour
     private void FixedUpdate()
     {
         // 速度を更新する
-        rbody.velocity = new Vector2(speed*axisH, rbody.velocity.y);
+        rbody.linearVelocity = new Vector2(speed*axisH, rbody.linearVelocity.y);
     }
 }
