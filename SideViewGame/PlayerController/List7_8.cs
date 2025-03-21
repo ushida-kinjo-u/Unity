@@ -193,7 +193,7 @@ public class PlayerController : MonoBehaviour
     {
         // Rigidbody2D を取ってくる
         Rigidbody2D rbody = GetComponent<Rigidbody2D>(); // 速度を 0 にして強制停止
-        rbody.velocity = new Vector2(0, 0);
+        rbody.linearVelocity = new Vector2(0, 0);
     }
 
     // タッチスクリーン対応追加
