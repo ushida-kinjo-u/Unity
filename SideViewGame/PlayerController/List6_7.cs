@@ -136,15 +136,15 @@ public class PlayerController : MonoBehaviour
     // 接触開始
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Goal")
+       if (collision.gameObject.CompareTag("Goal"))
         {
             Goal();        // ゴール！！
         }
-        else if (collision.gameObject.tag == "Dead")
+        else if (collision.gameObject.CompareTag("Dead"))
         {
             GameOver();     // ゲームオーバー
         }
-        else if (collision.gameObject.tag =="ScoreItem")
+        else if (collision.gameObject.CompareTag("ScoreItem"))
         {
             // スコアアイテム
             // ItemDataを得る
