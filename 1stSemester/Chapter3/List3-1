@@ -1,3 +1,5 @@
+// List 3-1  「クリックすると一定の速さで回転する」スクリプト 
+
 using UnityEngine;
 
 public class RouletteController : MonoBehaviour
