@@ -1,0 +1,44 @@
+// コード5-03 GameManager.cs
+
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+using UnityEngine.UI;
+
+public class GameManager : MonoBehaviour
+{
+    //定数定義：壁方向
+    public const int WALL_FRONT = 1;    //前
+    public const int WALL_RIGHT = 2;    //右
+    public const int WALL_BACK  = 3;    //後
+    public const int WALL_LEFT  = 4;    //左
+
+    public GameObject panelWalls;        //壁全体
+
+    private int wallNo;                    //現在の向いている方向
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        wallNo = WALL_FRONT;            //スタート時点では「前」を向く
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    //右（>）ボタンを押した
+    public void PushButtonRight()
+    {
+        wallNo++;   //方向を1つ右に
+                    //「左」の1つ右は「前」
+        if (wallNo > WALL_LEFT)
+        {
+            wallNo = WALL_FRONT;
+        }
+        DisplayWall();  //壁表示更新
+    }
+}
