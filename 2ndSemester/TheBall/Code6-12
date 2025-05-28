@@ -1,0 +1,29 @@
+// コード 6-12 StageSelectManager.cs
+
+using UnityEngine;
+using System.Collections;
+
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+public class StageSelectManager : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    //ステージ選択ボタンを押した
+    public void PushStageSelectButton(int stageNo)
+    {
+        //ゲームシーンへ
+        SceneManager.LoadScene("PuzzleScene" + stageNo);
+    }
+}
