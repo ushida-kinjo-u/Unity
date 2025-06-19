@@ -1,7 +1,7 @@
 # ノベルゲーム
 
 List 1  TypingText.cs
-```csharp copy
+```csharp
 using System.Collections;  // コルーチン（IEnumerator）を使うために必要
 using UnityEngine;
 using UnityEngine.UI;
