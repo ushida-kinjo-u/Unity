@@ -21,11 +21,11 @@ public class TypingText : MonoBehaviour
 
     IEnumerator ShowText()
     {
-        for (int i = 0; i <= fullText.Length; i++) 　// i を0からfullText.Length（文字数）まで1ずつ増やす
+        for (int i = 0; i <= fullText.Length; i++)  // i を0からfullText.Length（文字数）まで1ずつ増やす
         {
             currentText = fullText.Substring(0, i);   //文字列の先頭からi文字目までを取り出す
-            targetText.text = currentText;          //画面のテキストを更新
-            yield return new WaitForSeconds(delay); // delayの時間だけ待つ
+            targetText.text = currentText;            //画面のテキストを更新
+            yield return new WaitForSeconds(delay);   // delayの時間だけ待つ
         }
     }
 }
