@@ -1,4 +1,4 @@
-シューティングゲーム StarExplorer
+シューティングゲーム Shooting Game
 
 List 1 PlayerMovement.cs
 ```csharp
