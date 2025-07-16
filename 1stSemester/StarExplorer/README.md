@@ -324,3 +324,277 @@ public class Enemy : MonoBehaviour
 }
 ```
 
+List 11 PlayerShooting.cs（AudioClip 追加版）
+```csharp
+using UnityEngine;
+
+public class PlayerShooting : MonoBehaviour
+{
+    public GameObject laserPrefab;
+    public Transform firePoint;
+    public float laserSpeed = 10f;
+
+    public AudioClip shootSound;  // 発射音
+    private AudioSource audioSource; // 音を再生する装置
+
+    void Start()
+    {
+        // AudioSource を取得（なければ追加）
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GameObject laser = Instantiate(laserPrefab, firePoint.position, Quaternion.identity);
+            Rigidbody2D rb = laser.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.velocity = Vector2.up * laserSpeed;
+            }
+
+            // 効果音を再生
+            audioSource.PlayOneShot(shootSound);
+        }
+    }
+}
+```
+
+List 12 Enemy.cs （爆発音の追加版）
+```csharp
+using UnityEngine;
+
+public class Enemy : MonoBehaviour
+{
+    public AudioClip explosionSound; // 爆発音
+    private AudioSource audioSource;
+
+    void Start()
+    {
+        // AudioSource を取得 or 追加
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            // 爆発音を再生
+            AudioSource.PlayClipAtPoint(explosionSound, transform.position);
+
+            // ライフ減らす処理など
+            GameManager.Instance.ReduceLife(1);
+            Destroy(gameObject);
+        }
+
+        if (other.CompareTag("Laser"))
+        {
+            GameManager.Instance.AddScore(10);
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
+    }
+}
+```
+
+List 13 GameManager.cs（ゲームオーバー追加版）
+```csharp
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement; // ← シーンを再読み込みするのに必要
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance;
+
+    public int score = 0;
+    public int life = 3;
+
+    public Text scoreText;
+    public Text lifeText;
+
+    public GameObject gameOverPanel; // ゲームオーバーUIを表示するため
+    public Button restartButton;     // リスタート用ボタン
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        UpdateUI();
+        gameOverPanel.SetActive(false); // 最初は非表示
+        restartButton.onClick.AddListener(RestartGame); // ボタンに処理をつなぐ
+    }
+
+    public void AddScore(int amount)
+    {
+        score += amount;
+        UpdateUI();
+    }
+
+    public void ReduceLife(int amount)
+    {
+        life -= amount;
+        UpdateUI();
+
+        if (life <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    void UpdateUI()
+    {
+        scoreText.text = "Score: " + score;
+        lifeText.text = "Life: " + life;
+    }
+
+    void GameOver()
+    {
+        gameOverPanel.SetActive(true); // パネルを表示
+        Time.timeScale = 0f; // 時間を止める（オプション）
+    }
+
+    void RestartGame()
+    {
+        Time.timeScale = 1f; // 時間を元に戻す
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // 今のシーンをリロード
+    }
+}
+```
+
+
+List 14 RankingManager.cs
+```csharp
+using UnityEngine;
+using UnityEngine.UI;
+
+public class RankingManager : MonoBehaviour
+{
+    public Text[] rankTexts; // ランキング表示用のテキスト（上位3位など）
+    private int maxRank = 5;
+
+    // ゲームオーバー時に現在スコアを追加
+    public void AddScoreToRanking(int newScore)
+    {
+        // 保存済みスコアを配列で取得
+        int[] scores = new int[maxRank];
+        for (int i = 0; i < maxRank; i++)
+        {
+            scores[i] = PlayerPrefs.GetInt("Rank" + i, 0);
+        }
+
+        // 新しいスコアを追加して並べ替え
+        scores[maxRank - 1] = newScore;
+        System.Array.Sort(scores);
+        System.Array.Reverse(scores); // 高い順に
+
+        // 上位だけ保存し直し
+        for (int i = 0; i < maxRank; i++)
+        {
+            PlayerPrefs.SetInt("Rank" + i, scores[i]);
+        }
+
+        // 表示を更新
+        UpdateRankingDisplay();
+    }
+
+    // ランキングを画面に表示
+    public void UpdateRankingDisplay()
+    {
+        for (int i = 0; i < rankTexts.Length; i++)
+        {
+            int score = PlayerPrefs.GetInt("Rank" + i, 0);
+            rankTexts[i].text = (i + 1) + "位： " + score + "点";
+        }
+    }
+}
+```
+
+List 15 GameManager.cs の修正：
+```csharp
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement; // ← シーンを再読み込みするのに必要
+
+public class GameManager : MonoBehaviour
+{
+    public static GameManager Instance;
+
+    public int score = 0;
+    public int life = 3;
+
+    public Text scoreText;
+    public Text lifeText;
+
+    public GameObject gameOverPanel; // ゲームオーバーUIを表示するため
+    public GameObject rankingPanel; // ランキングパネルを表示するため
+    public Button restartButton;     // リスタート用ボタン
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
+    void Start()
+    {
+        UpdateUI();
+        gameOverPanel.SetActive(false); // 最初は非表示
+        rankingPanel.SetActive(false); // 最初は非表示
+        restartButton.onClick.AddListener(RestartGame); // ボタンに処理をつなぐ
+    }
+
+    public void AddScore(int amount)
+    {
+        score += amount;
+        UpdateUI();
+    }
+
+    public void ReduceLife(int amount)
+    {
+        life -= amount;
+        UpdateUI();
+
+        if (life <= 0)
+        {
+            GameOver();
+        }
+    }
+
+    void UpdateUI()
+    {
+        scoreText.text = "Score: " + score;
+        lifeText.text = "Life: " + life;
+    }
+
+    void GameOver()
+{
+    gameOverPanel.SetActive(true);
+    rankingPanel.SetActive(true);     // ランキングUIを表示
+    Time.timeScale = 0f;
+
+    // ランキングに現在のスコアを追加
+    FindFirstObjectByType<RankingManager>().AddScoreToRanking(score);
+}
+
+
+    void RestartGame()
+    {
+        Time.timeScale = 1f; // 時間を元に戻す
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // 今のシーンをリロード
+    }
+}
+```
