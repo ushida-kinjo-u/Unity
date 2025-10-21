@@ -1,23 +1,23 @@
-// List 7-1 ダメージブロックを落下させるスクリプトを作ろう
+// P204 List7-1 GimmickBlock.cs
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GimmickBlock : MonoBehaviour
 {
     public float length = 0.0f;     // 自動落下検知距離
     public bool isDelete = false;   // 落下後に削除するフラグ
-
+    GameObject deadObj;             // 死亡当たり
     bool isFell = false;            // 落下フラグ
     float fadeTime = 0.5f;          // フェードアウト時間
 
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         // Rigidbody2Dの物理挙動を停止
         Rigidbody2D rbody = GetComponent<Rigidbody2D>();
         rbody.bodyType = RigidbodyType2D.Static;
+        deadObj = transform.Find("DeadObject").gameObject;  //死亡あたり取得
+        deadObj.SetActive(false);                           //死亡あたりを非表示
     }
 
     // Update is called once per frame
@@ -35,6 +35,7 @@ public class GimmickBlock : MonoBehaviour
                 {
                     // Rigidbody2Dの物理挙動を開始
                     rbody.bodyType = RigidbodyType2D.Dynamic;
+                    deadObj.SetActive(true);    //死亡あたりを表示
                 }
             }
         }
@@ -61,5 +62,10 @@ public class GimmickBlock : MonoBehaviour
         {
             isFell = true; // 落下フラグオン
         }
+    }
+    //範囲表示
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireSphere(transform.position, length);
     }
 }
