@@ -1,17 +1,16 @@
-// List 7-3 スイッチのゲームオブジェクトを作ろう
+// P216 List7-3 SwitchAction.cs
+// スイッチのスクリプト
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SwitchAction : MonoBehaviour
 {
     public GameObject targetMoveBlock;
-    public Sprite imageOn;
     public Sprite imageOff;
+    public Sprite imageOn;
     public bool on = false; // スイッチの状態(true:押されている false:押されていない)
 
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (on)
