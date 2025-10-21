@@ -1,59 +1,55 @@
-// 最初に作るGameManager
+// P141 List5-1 GameManager.cs
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // UI を使うのに必要
+using UnityEngine.UI;               // UIを使うのに必要
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject mainImage;        // 画像を持つ GameObject
-    public Sprite gameOverSpr;          // GAME OVER 画像
-    public Sprite gameClearSpr;         // GAME CLEAR 画像
+    public GameObject mainImage;        // 画像を持つImageゲームオブジェクト
+    public Sprite gameOverSpr;          // GAME OVER画像
+    public Sprite gameClearSpr;         // GAME CLEAR画像
     public GameObject panel;            // パネル
-    public GameObject restartButton;    // RESTART ボタン
-    public GameObject nextButton;       // ネクストボタン
+    public GameObject restartButton;    // RESTARTボタン
+    public GameObject nextButton;       // NEXTボタン
+    Image titleImage;                   // 画像を表示するImageコンポーネント
 
-    Image titleImage;                   // 画像を表示している Image コンポーネント
+    GameState gamestate = GameState.InGame; // ゲームの状態
 
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // 画像を非表示にする
-        Invoke("InactiveImage", 1.0f);
-        // ボタン(パネル)を非表示にする
-        panel.SetActive(false);
+        Invoke("InactiveImage", 1.0f);  // 1秒後に画像を非表示にする
+        panel.SetActive(false);         // パネルを非表示にする
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (PlayerController.gameState == "gameclear")
+        if (PlayerController.gameState == GameState.GameClear)
         {
             // ゲームクリア
-            mainImage.SetActive(true); // 画像を表示する
-            panel.SetActive(true); // ボタン(パネル)を表示する
-            // RESTART ボタンを無効化する
+            gamestate = GameState.GameClear;
+            mainImage.SetActive(true);  // 画像を表示する
+            panel.SetActive(true);      // ボタン（パネル）を表示する
+            // RESTARTボタンを無効化する
             Button bt = restartButton.GetComponent<Button>();
             bt.interactable = false;
-            mainImage.GetComponent<Image>().sprite = gameClearSpr;
-            PlayerController.gameState = "gameend";
-
+            mainImage.GetComponent<Image>().sprite = gameClearSpr; // 画像を設定する
+            PlayerController.gameState = GameState.GameEnd;
         }
-
-        else if (PlayerController.gameState == "gameover")
+        else if (PlayerController.gameState == GameState.GameOver)
         {
             // ゲームオーバー
-            mainImage.SetActive(true);      // 画像を表示する
-            panel.SetActive(true);          // ボタン(パネル)を表示する
-            // NEXT ボタンを無効化する
+            gamestate = GameState.GameOver;
+            mainImage.SetActive(true);  // 画像を表示する
+            panel.SetActive(true);      // ボタン（パネル）を表示する
+            // NEXTボタンを無効化する
             Button bt = nextButton.GetComponent<Button>();
             bt.interactable = false;
-            mainImage.GetComponent<Image>().sprite = gameOverSpr;
-            PlayerController.gameState = "gameend";
+            mainImage.GetComponent<Image>().sprite = gameOverSpr; // 画像を設定する
+            PlayerController.gameState = GameState.GameEnd;
         }
-
-        else if (PlayerController.gameState == "playing")
+        else if (PlayerController.gameState == GameState.InGame)
         {
             // ゲーム中
         }
