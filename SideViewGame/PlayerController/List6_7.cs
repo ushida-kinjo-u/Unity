@@ -1,18 +1,25 @@
-// List 6-7 アイテム取得スクリプト
+// P186 List6-9 PlayerController.cs
+// アイテム取得スクリプト
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+
+public enum GameState           // ゲームの状態
+{
+    InGame,                     // ゲーム中
+    GameClear,                  // ゲームクリア
+    GameOver,                   // ゲームオーバー
+    GameEnd,                    // ゲーム終了
+}
 
 public class PlayerController : MonoBehaviour
 {
-    Rigidbody2D rbody;  // RigidBody2D型の変数
-    float axisH = 0.0f; // 入力
-    public float speed = 3.0f;  // 移動速度
-    public float jump = 9.0f;   // ジャンプ力
+    Rigidbody2D rbody;              // Rigidbody2D型の変数
+    float axisH = 0.0f;             // 入力
+    public float speed = 3.0f;      // 移動速度
+    public float jump = 9.0f;       // ジャンプ力
     public LayerMask groundLayer;   // 着地できるレイヤー
-    bool goJump = false;        // ジャンプ開始フラグ
-    bool onGround = false;      // 地面に立っているフラグ
+    bool goJump = false;            // ジャンプ開始フラグ
+    bool onGround = false;          // 地面フラグ
 
     // アニメーション対応
     Animator animator; // アニメーター
@@ -24,86 +31,67 @@ public class PlayerController : MonoBehaviour
     string nowAnime = "";
     string oldAnime = "";
 
-    public static string gameState = "playing"; // ゲームの状態
-    public int score = 0;   // スコア
+    // ゲームの状態
+    public static GameState gameState; // ゲームの状態
 
-    // Start is called before the first frame update
+    //カメラ制御
+    public float camLeft = 0.0f;        // カメラ左スクロールリミット
+    public float camRight = 0.0f;       // カメラ右スクロールリミット
+    public float camTop = 0.0f;         // カメラ上スクロールリミット
+    public float camBottom = 0.0f;      // カメラ下スクロールリミット
+
+    // 多重スクロール
+    public GameObject subScreen;        // サブスクリーン
+
+    // 強制スクロール
+    public bool isForceScrollX = false;     // 強制スクロールフラグ
+    public float forceScrollSpeedX = 0.5f;  // 1秒間で動かすX距離
+    public bool isForceScrollY = false;     // Y軸強制スクロールフラグ
+    public float forceScrollSpeedY = 0.5f;  // 1秒間で動かすY距離
+
+    public int score = 0;               // スコア
+
     void Start()
     {
-        // Rigidbody2Dを取ってくる
-        rbody = this.GetComponent<Rigidbody2D>();
+        rbody = this.GetComponent<Rigidbody2D>();   // Rigidbody2Dを取ってくる
+        animator = GetComponent<Animator>();        // Animator を取ってくる
+        nowAnime = stopAnime;                       // 停止から開始する
+        oldAnime = stopAnime;                       // 停止から開始する
 
-        // Animatorを取ってくる
-        animator = GetComponent<Animator>();
-        nowAnime = stopAnime;
-        oldAnime = stopAnime;
-        gameState = "playing"; // ゲーム中にする
+        gameState = GameState.InGame;               // ゲーム中にする
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (gameState != "playing")
+        if (gameState != GameState.InGame)
         {
             return;
         }
-
-        // 水平方向の入力をチェックする
-        axisH = Input.GetAxisRaw("Horizontal");
-
-        // 向きの調整
-        if (axisH > 0.0f)
+        // 地上判定
+        onGround = Physics2D.CircleCast(transform.position,    // 発射位置
+                                        0.2f,                  // 円の半径
+                                        Vector2.down,          // 発射方向
+                                        0.0f,                  // 発射距離
+                                        groundLayer);          // 検出するレイヤー
+                                                               // キャラクターをジャンプさせる
+        if (Input.GetButtonDown("Jump"))
         {
+            goJump = true; // ジャンプフラグを立てる
+        }
 
-            // 右移動
-            // Debug.Log("右移動");
-            transform.localScale = new Vector2(1, 1);
+        axisH = Input.GetAxisRaw("Horizontal");     //水平方向の入力をチェックする
+        if (axisH > 0.0f)                           // 向きの調整
+        {
+            transform.localScale = new Vector2(1, 1);   // 右移動
         }
         else if (axisH < 0.0f)
         {
-            // 左移動
-            // Debug.Log("左移動");
-            transform.localScale = new Vector2(-1, 1);  // 左右反転させる
+            transform.localScale = new Vector2(-1, 1); // 左右反転させる
         }
 
-        // キャラクターをジャンプさせる
-        if (Input.GetButtonDown("Jump"))
+        // アニメーション更新
+        if (onGround)       // 地面の上
         {
-            Jump(); // ジャンプ
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (gameState != "playing")
-        {
-            return;
-        }
-
-        // 地上判定
-        onGround = Physics2D.Linecast(transform.position,
-                                      transform.position - (transform.up * 1.0f),
-                                      groundLayer);
-
-        if (onGround || axisH != 0)
-        {
-            // 地面の上 or 速度が 0 ではない
-            // 速度を更新する
-            rbody.linearVelocity = new Vector2(speed*axisH, rbody.linearVelocity.y);
-        }
-
-        if (onGround && goJump)
-        {
-            // 地面の上でジャンプキーが押された
-            // ジャンプさせる
-            Vector2 jumpPw = new Vector2(0, jump);        // ジャンプさせるベクトルを作る
-            rbody.AddForce(jumpPw, ForceMode2D.Impulse);  // 瞬間的な力を加える
-            goJump = false; // ジャンプフラグを下ろす
-        }
-
-        if (onGround)
-        {
-            // 地面の上
             if (axisH == 0)
             {
                 nowAnime = stopAnime; // 停止中
@@ -113,83 +101,105 @@ public class PlayerController : MonoBehaviour
                 nowAnime = moveAnime; // 移動
             }
         }
-        else
+        else                // 空中
         {
-            // 空中
             nowAnime = jumpAnime;
         }
-
         if (nowAnime != oldAnime)
         {
             oldAnime = nowAnime;
             animator.Play(nowAnime); // アニメーション再生
         }
-    }
 
-    // ジャンプ
-    public void Jump()
+        //カメラ制御
+        float x;
+        float y;
+        if (isForceScrollX)    // 横強制スクロール
+        {
+            x = Camera.main.transform.position.x + (forceScrollSpeedX * Time.deltaTime);
+        }
+        else
+        {
+            x = Mathf.Clamp(transform.position.x, camLeft, camRight);
+        }
+        if (isForceScrollY)    // 縦強制スクロール
+        {
+            y = Camera.main.transform.position.y + (forceScrollSpeedY * Time.deltaTime);
+        }
+        else
+        {
+            y = Mathf.Clamp(transform.position.y, camBottom, camTop);
+        }
+        Vector3 camPos = new Vector3(x, y, -10);        // カメラ位置のVector3を作る
+        Camera.main.transform.position = camPos;        // カメラの更新座標
+        // サブスクリーンスクロール
+        if (subScreen != null)
+        {
+            y = subScreen.transform.position.y;
+            Vector3 subpos = new Vector3(x / 2.0f, y, subScreen.transform.position.z);
+            subScreen.transform.position = subpos;
+        }
+    }
+    
+    void FixedUpdate()
     {
-        goJump = true;  // ジャンプフラグを立てる
-        Debug.Log("ジャンプボタン押し！");
+        if (gameState != GameState.InGame)
+        {
+            return;
+        }
+        if (onGround || axisH != 0)     // 地面の上 or 速度が 0 ではない
+        {
+            //速度を更新する
+            rbody.linearVelocity = new Vector2(axisH * speed, rbody.linearVelocity.y);
+        }
+        if (onGround && goJump)         // 地面の上でジャンプキーが押された
+        {
+            // ジャンプさせる
+            Vector2 jumpPw = new Vector2(0, jump);          // ジャンプさせるベクトルを作る
+            rbody.AddForce(jumpPw, ForceMode2D.Impulse);    // 瞬間的な力を加える
+            goJump = false;                                 // ジャンプフラグを下ろす
+        }
     }
 
     // 接触開始
-    private void OnTriggerEnter2D(Collider2D collision)
+    void OnTriggerEnter2D(Collider2D collision)
     {
-       if (collision.gameObject.CompareTag("Goal"))
+        if (collision.gameObject.tag == "Goal")
         {
-            Goal();        // ゴール！！
+            Goal();         // ゴール！！
         }
-        else if (collision.gameObject.CompareTag("Dead"))
+        else if (collision.gameObject.tag == "Dead")
         {
             GameOver();     // ゲームオーバー
         }
-        else if (collision.gameObject.CompareTag("ScoreItem"))
+        else if (collision.gameObject.tag == "ScoreItem")
         {
             // スコアアイテム
-            // ItemDataを得る
-            ItemData item = collision.gameObject.GetComponent<ItemData>();
-
-            // スコアを得る
-            score = item.value;
-
-            // アイテムを削除する
-            Destroy(collision.gameObject);
+            ScoreItem item = collision.gameObject.GetComponent<ScoreItem>();  // ScoreItemを得る           
+            score = item.itemdata.value;                // スコアを得る
+            Destroy(collision.gameObject);              // アイテム削除する
         }
     }
-
     // ゴール
     public void Goal()
     {
-        gameState = "gameclear";
         animator.Play(goalAnime);
+        gameState = GameState.GameClear;
+        GameStop();             // ゲーム停止
     }
-
     // ゲームオーバー
     public void GameOver()
     {
-        gameState = "gameover";
         animator.Play(deadAnime);
-        GameStop(); // ゲーム停止
-
-        // =====================
+        gameState = GameState.GameOver;
+        GameStop();             // ゲーム停止
         // ゲームオーバー演出
-        // =====================
-
-        // プレイヤー当たりを消す
-        GetComponent<CapsuleCollider2D>().enabled = false;
-
-        // プレイヤーを上に少し跳ね上げる演出
-        rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse);
-
-        Debug.Log("ゲームオーバー");
+        GetComponent<CapsuleCollider2D>().enabled = false;      // 当たりを消す
+        rbody.AddForce(new Vector2(0, 5), ForceMode2D.Impulse); // 上に少し跳ね上げる
     }
-
     // ゲーム停止
     void GameStop()
     {
-        // Rigidbody2D を取ってくる
-        Rigidbody2D rbody = GetComponent<Rigidbody2D>(); // 速度を 0 にして強制停止
-        rbody.linearVelocity = new Vector2(0, 0);
+        rbody.linearVelocity = new Vector2(0, 0);               // 速度を0にして強制停止
     }
 }
