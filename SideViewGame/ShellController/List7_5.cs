@@ -1,14 +1,12 @@
-// List 7-5 砲弾のスクリプトを作ろう
+// P224 List7-5 ShellController.cs
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ShellController : MonoBehaviour
 {
     public float deleteTime = 3.0f; // 削除する時間指定
 
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Destroy(gameObject, deleteTime); // 削除設定
