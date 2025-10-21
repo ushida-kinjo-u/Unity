@@ -1,25 +1,22 @@
-// List 6-4 時間を計測するスクリプトを作ろう
+// P174 List6-5 TimeController.cs
+// 時間を計測するスクリプト
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TimeController : MonoBehaviour
 {
-    public bool isCountDown = true; // true= 時間をカウントダウン計測する
-    public float gameTime = 0;      // ゲームの最大時間
-    public bool isTimeOver = false; // true= タイマー停止
-    public float displayTime = 0;   // 表示時間
+    public bool isCountDown = true;     // true=時間をカウントダウン計測する
+    public float gameTime = 0;          // ゲームの最大時間
+    public bool isTimeOver = false;     // true=タイマー停止
+    public float displayTime = 0;       // 表示時間
+    float times = 0;                    // 現在時間
 
-    float times = 0;                // 現在時間
-
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (isCountDown)
         {
-            // カウントダウン
-            displayTime = gameTime;
+            displayTime = gameTime;     // カウントダウン
         }
     }
 
@@ -29,9 +26,8 @@ public class TimeController : MonoBehaviour
         if (isTimeOver == false)
         {
             times += Time.deltaTime;
-            if (isCountDown)
+            if (isCountDown)        // カウントダウン
             {
-                // カウントダウン
                 displayTime = gameTime - times;
                 if (displayTime <= 0.0f)
                 {
@@ -39,9 +35,8 @@ public class TimeController : MonoBehaviour
                     isTimeOver = true;
                 }
             }
-            else
+            else                    // カウントアップ
             {
-                // カウントアップ
                 displayTime = times;
                 if (displayTime >= gameTime)
                 {
