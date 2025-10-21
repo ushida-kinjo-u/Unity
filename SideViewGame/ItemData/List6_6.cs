@@ -1,22 +1,11 @@
-// List 6-6 アイテムデータスクリプト（ItemData）を作ろう
+// P183 List6-7 ItemData
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemData : MonoBehaviour
+[CreateAssetMenu(menuName = "Item/ScoreItem", fileName = "ScoreItem")]
+public class ItemData : ScriptableObject
 {
-    public int value = 0;       // 整数値を設定できる
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public int value = 0;           // アイテム値
+    public string itemName = "";    // アイテム名
+    public Sprite itemSprite;       // アイテム画像
 }
