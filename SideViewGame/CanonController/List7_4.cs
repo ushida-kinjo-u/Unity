@@ -1,59 +1,55 @@
-```csharp
+// P220 List7-4 CannonController.cs
 // 固定砲台のスクリプト
 
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CannonController : MonoBehaviour
 {
-    public GameObject objPrefab;        // 発生させる Prefab データ 
-    public float delayTime = 3.0f;      // 遅延時間
-    public float fireSpeedX = -4.0f;    // 発射ベクトル X
-    public float fireSpeedY = 0.0f;     // 発射ベクトル Y
-    public float length = 8.0f;
+    public GameObject objPrefab;            //発生させるPrefabデータ
+    public float delayTime = 3.0f;          //遅延時間
+    public float fireSpeed = 4.0f;          //発射速度
+    public float length = 8.0f;             //範囲
 
-    GameObject player;                  // プレイヤー
-    GameObject gateObj;                 // 発射口
-    float passedTimes = 0;              // 経過時間
-
-    // Start is called before the first frame update
+    GameObject player;                      //プレイヤー
+    Transform gateTransform;                //発射口のTransform
+    float passedTimes = 0;                  //経過時間
+                                            //距離チェック
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        // 発射口オブジェクトを取得
-        Transform tr = transform.Find("gate");
-        gateObj = tr.gameObject;
-        // プレイヤー
+        //発射口オブジェクトのTransformを取得
+        gateTransform = transform.Find("gate");
+        //プレイヤーを取得
         player = GameObject.FindGameObjectWithTag("Player");
     }
 
     // Update is called once per frame
     void Update()
     {
-        // 発射時間判定
+        //待機時間加算
         passedTimes += Time.deltaTime;
-        // 距離チェック
+        //Playerとの距離チェック
         if (CheckLength(player.transform.position))
         {
+            //待機時間経過
             if (passedTimes > delayTime)
             {
-                // 発射!!
-                passedTimes = 0;
-                // 発射位置
-                Vector3 pos = new Vector3(gateObj.transform.position.x,
-                                          gateObj.transform.position.y,
-                                          transform.position.z);
-                // Prefab から GameObject を作る
+                passedTimes = 0;        //時間を0にリセット
+                //砲弾をプレハブから作る
+                Vector2 pos = new Vector2(gateTransform.position.x,
+                    gateTransform.position.y);
                 GameObject obj = Instantiate(objPrefab, pos, Quaternion.identity);
-                // 発射方向
+                //砲身が向いている方向に発射する
                 Rigidbody2D rbody = obj.GetComponent<Rigidbody2D>();
-                Vector2 v = new Vector2(fireSpeedX, fireSpeedY);
+                float angleZ = transform.localEulerAngles.z;
+                float x = - 1.0f * Mathf.Cos(angleZ * Mathf.Deg2Rad);
+                float y = Mathf.Sin(angleZ * Mathf.Deg2Rad);
+                Vector2 v = new Vector2(x, y) * fireSpeed;
                 rbody.AddForce(v, ForceMode2D.Impulse);
             }
         }
     }
 
-    // 距離チェック
     bool CheckLength(Vector2 targetPos)
     {
         bool ret = false;
@@ -64,5 +60,10 @@ public class CannonController : MonoBehaviour
         }
         return ret;
     }
+
+    //範囲表示
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.DrawWireSphere(transform.position, length);
+    }
 }
-```
